@@ -1,0 +1,11 @@
+snyk-security-scan:
+  image: node:18
+  stage: test
+  script:
+    - npm install
+    - npx snyk test --all-projects
+    - npx snyk monitor --all-projects
+  variables:
+    SNYK_TOKEN: $SNYK_TOKEN=c0499f17-4688-465a-abb6-441e9e7392be
+  only:
+    - main

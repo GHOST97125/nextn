@@ -11,9 +11,11 @@ export default function Home() {
           Un outil terrain intelligent pour les tournées de maintenance.
         </p>
       </header>
+
       <main className="space-y-16">
         <SignalInspector />
       </main>
+
       <footer className="text-center mt-16 text-slate-500">
         <p>
           Cette maquette est une adaptation de l'Annexe Technique - Critères
@@ -23,3 +25,4 @@ export default function Home() {
     </div>
   );
 }
+

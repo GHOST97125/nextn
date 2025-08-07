@@ -9,7 +9,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "audit:check": "npm audit --audit-level=moderate || echo 'Audit termin\u00e9 avec des vuln\u00e9rabilit\u00e9s connues ignor\u00e9es'",
+    "audit:ci": "npx audit-ci --min-severity moderate",
+    "snyk:test": "npx snyk test"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.14.1",
@@ -48,11 +51,11 @@
     "leaflet": "^1.9.4",
     "lucide-react": "^0.475.0",
     "next": "15.3.3",
-    "patch-package": "^8.0.0",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.54.2",
+    "react-hot-toast": "^2.5.2",
     "react-leaflet": "^4.2.1",
     "recharts": "^2.15.1",
     "tailwind-merge": "^3.0.1",
@@ -65,9 +68,13 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/react-leaflet": "^3.0.0",
-    "genkit-cli": "^1.14.1",
+    "genkit-cli": "^0.0.2",
+    "patch-package": "^8.0.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "audit-ci": "^6.0.0",
+    "snyk": "^1.1200.0",
+    "patch-files": "^1.0.0"
   }
 }

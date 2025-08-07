@@ -1,77 +1,78 @@
-"use client";
+'use client';
 
-import * as React from 'react';
-import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Loader2, Copy as CopyIcon } from 'lucide-react';
-import heic2any from 'heic2any';
-import * as EXIF from 'exif-js';
-
+import { Loader2, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
-import type { ImageData, ReportData } from '@/types';
 
-import { analyzeSignImage } from '@/ai/flows/analyze-sign-image';
-import { summarizeRouteCondition } from '@/ai/flows/summarize-route-condition';
-import { generateRepairMaterialsList } from '@/ai/flows/generate-repair-materials-list';
-import { suggestSafetyGuidelines } from '@/ai/flows/suggest-safety-guidelines';
+const SignalInspector = () => {
+  const [convertedImage, setConvertedImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [exifData, setExifData] = useState<Record<string, any> | null>(null);
 
-const MapDisplay = dynamic(() => import('@/components/map-display'), {
-  ssr: false,
-  loading: () => <div className="h-[400px] w-full bg-muted rounded-lg flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>,
-});
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-export default function SignalInspector() {
-  const [images, setImages] = React.useState<ImageData[]>([]);
-  const [observations, setObservations] = React.useState('');
-  const [reportData, setReportData] = React.useState<ReportData | null>(null);
-  const [materialList, setMaterialList] = React.useState('');
-  const [safetyGuidelines, setSafetyGuidelines] = React.useState('');
-  
-  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
-  const [isGeneratingReport, setIsGeneratingReport] = React.useState(false);
-  const [isGeneratingActions, setIsGeneratingActions] = React.useState(false);
+    setLoading(true);
+    try {
+      const heic2any = (await import('heic2any')).default;
+      const EXIF = await import('exif-js');
 
-  const { toast } = useToast();
+      const blob = new Blob([file]);
+      const resultBlob = await heic2any({ blob, toType: 'image/jpeg' }) as Blob;
+      const imageUrl = URL.createObjectURL(resultBlob);
+      setConvertedImage(imageUrl);
 
-  const dmsToDd = React.useCallback((dms: any, ref: any): number | null => {
-    if (!dms || !Array.isArray(dms) || dms.length !== 3) return null;
-
-    const degrees = dms[0].numerator ? dms[0].numerator / dms[0].denominator : dms[0];
-    const minutes = dms[1].numerator ? dms[1].numerator / dms[1].denominator : dms[1];
-    const seconds = dms[2].numerator ? dms[2].numerator / dms[2].denominator : dms[2];
-
-    let dd = degrees + minutes / 60 + seconds / 3600;
-    
-    if (ref === "S" || ref === "W") {
-        dd = dd * -1;
+      EXIF.getData(file, function () {
+        const allMetaData = EXIF.getAllTags(this);
+        setExifData(allMetaData);
+      });
+    } catch (error) {
+      console.error('Erreur de conversion ou lecture EXIF :', error);
+    } finally {
+      setLoading(false);
     }
-    return dd;
-  }, []);
+  };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files) return;
+  return (
+    <div className="space-y-4 p-4 bg-white rounded shadow">
+      <h2 className="text-xl font-semibold">Inspecteur de signal (HEIC → JPEG)</h2>
 
-    setImages([]);
-    setObservations('');
-    setReportData(null);
-    setMaterialList('');
-    setSafetyGuidelines('');
+      <input
+        type="file"
+        accept=".heic"
+        onChange={handleFileChange}
+        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+      />
 
-    const imagePromises = Array.from(files).map((file, index) => {
-      return new Promise<ImageData | null>(async (resolve) => {
-        let fileToProcess = file;
-        const isHeic = file.type === 'image/heic' || file.type === 'image/heif' || /\.(heic|heif)$/i.test(file.name);
-        
-        if (isHeic) {
-          try {
-            const conversionResult = await heic2any({ blob: file, toType: "image/jpeg" });
-            fileToProcess = Array.isArray(conversionResult) ? conversionResult[0] : conversionResult;
-          } catch (e) {
+      {loading && <Loader2 className="animate-spin text-blue-500" />}
+
+      {convertedImage && (
+        <div className="space-y-2">
+          <Image src={convertedImage} alt="Image convertie" width={400} height={300} />
+          <p className="text-sm text-gray-600">Image convertie avec succès.</p>
+        </div>
+      )}
+
+      {exifData && (
+        <div className="mt-4">
+          <h3 className="text-md font-medium">Métadonnées EXIF :</h3>
+          <ul className="text-sm text-gray-700 list-disc ml-5">
+            {Object.entries(exifData).map(([key, value]) => (
+              <li key={key}>
+                <strong>{key}:</strong> {String(value)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default SignalInspector;
+
             console.error("HEIC Conversion Error:", e);
             resolve(null);
             return;

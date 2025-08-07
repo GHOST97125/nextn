@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "212050498019",
+    "project_id": "inspectsignal",
+    "storage_bucket": "inspectsignal.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:212050498019:android:b3b2d8abf89a08086390d6",
+        "android_client_info": {
+          "package_name": "com.inspectsignal.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB5pBFSAF5DVtEhX9ZGKYQY_ZJpzeCf7Gs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
